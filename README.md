@@ -90,3 +90,17 @@ python app.py
 | AI | 规则打分 + 简易模拟 |
 
 ---
+## 游戏运行本地截图
+<img width="2559" height="1301" alt="image" src="https://github.com/user-attachments/assets/6f42f596-dedc-479b-89aa-1a8f28a898c5" />
+<img width="2559" height="1468" alt="image" src="https://github.com/user-attachments/assets/3a5f9860-45e3-4884-b9ba-54aa2f2293a7" />
+<img width="2559" height="1471" alt="image" src="https://github.com/user-attachments/assets/5233924f-cc09-418c-a79f-4712a1341346" />
+<img width="1173" height="155" alt="image" src="https://github.com/user-attachments/assets/55dcb439-5e9f-4bb5-aa23-7230893064cb" />
+<img width="2033" height="726" alt="image" src="https://github.com/user-attachments/assets/de1686f3-6e20-4bf6-a772-58e62e4e5085" />
+<img width="1444" height="153" alt="image" src="https://github.com/user-attachments/assets/6f43fb61-d075-46f2-a9de-617847604725" />
+<img width="1362" height="163" alt="image" src="https://github.com/user-attachments/assets/a0df1077-8353-40a6-a966-feb05314c568" />
+
+
+
+
+
+
