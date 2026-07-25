@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>世界地理战略推演</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- 开始界面 -->
+    <div id="start-screen" class="screen active">
+        <div class="start-content">
+            <h1 class="game-title">世界地理战略推演</h1>
+            <p class="game-subtitle">WORLD GEOGRAPHY STRATEGIC SIMULATION</p>
+            <div class="start-buttons">
+                <button class="btn btn-primary btn-lg" onclick="startGame('pvp')">
+                    <span class="btn-icon">&#9876;</span> 双人对战
+                </button>
+                <button class="btn btn-secondary btn-lg" onclick="startGame('pve')">
+                    <span class="btn-icon">&#9881;</span> 人机对战
+                </button>
+            </div>
+            <div class="game-rules">
+                <h3>游戏规则</h3>
+                <ul>
+                    <li>每回合可行动 <strong>3</strong> 次（攻击或增援）</li>
+                    <li>攻击相邻敌方城市需消耗其兵力 <strong>×1.5</strong> 的兵力</li>
+                    <li>击败守军即可占领城市</li>
+                    <li>可向友方城市增援任意数量兵力（大于0）</li>
+                    <li>每回合所有城市自动增兵（连接数 × 1）</li>
+                    <li>占领对方所有城市或回合结束后城市多者获胜</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 游戏界面 -->
+    <div id="game-screen" class="screen">
+        <!-- 顶部信息栏 -->
+        <header class="top-bar">
+            <div class="turn-info">
+                <span class="turn-label">回合</span>
+                <span id="turn-number" class="turn-number">1</span>
+                <span class="turn-max">/ 150</span>
+            </div>
+            <div class="planning-player-info">
+                <span class="planning-label">正在规划：</span>
+                <button id="planning-toggle" class="btn btn-sm btn-primary" onclick="togglePlanningPlayer()">
+                    蓝方
+                </button>
+                <span class="planning-hint">（规划完成后切换另一方，对方看不到你的操作）</span>
+            </div>
+            <div class="top-actions">
+                <button class="btn btn-sm btn-outline" onclick="restartGame()">重新开始</button>
+            </div>
+        </header>
+
+        <!-- 主体内容 -->
+        <div class="main-content">
+            <!-- 左侧面板 - 玩家信息 -->
+            <aside class="side-panel left-panel">
+                <div class="player-card" id="player-a-card">
+                    <div class="player-header player-a-header">
+                        <span class="player-dot dot-a"></span>
+                        <span class="player-name">蓝方</span>
+                    </div>
+                    <div class="player-stats">
+                        <div class="stat-row">
+                            <span class="stat-label">城市</span>
+                            <span id="pa-cities" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">兵力</span>
+                            <span id="pa-troops" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">可用行动</span>
+                            <span id="pa-actions" class="stat-value">3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 行动队列 -->
+                <div class="action-queue">
+                    <h3 class="queue-title">行动队列</h3>
+                    <div id="action-queue-list" class="queue-list">
+                        <div class="queue-empty">暂无行动</div>
+                    </div>
+                    <div class="queue-actions">
+                        <button class="btn btn-sm btn-danger" onclick="clearActions()">清空</button>
+                        <button class="btn btn-sm btn-primary btn-resolve" onclick="confirmTurn()">统一结算</button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 中间 - 地图 -->
+            <main class="map-container">
+                <button class="panel-toggle panel-toggle-left" onclick="toggleLeftPanel()" title="折叠/展开左侧面板">◀</button>
+                <button class="panel-toggle panel-toggle-right" onclick="toggleRightPanel()" title="折叠/展开右侧面板">▶</button>
+                <button class="panel-toggle panel-toggle-top" onclick="toggleTopBar()" title="折叠/展开顶栏">▲</button>
+                <button class="panel-toggle panel-toggle-bottom" onclick="toggleBottomBar()" title="折叠/展开底栏">▼</button>
+                <svg id="game-map" viewBox="0 0 1800 1500" preserveAspectRatio="xMidYMid meet">
+                    <defs>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="2" result="blur"/>
+                            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                    </defs>
+                </svg>
+                <div id="city-tooltip" class="city-tooltip hidden"></div>
+            </main>
+
+            <!-- 右侧面板 -->
+            <aside class="side-panel right-panel">
+                <div class="player-card" id="player-b-card">
+                    <div class="player-header player-b-header">
+                        <span class="player-dot dot-b"></span>
+                        <span class="player-name">红方</span>
+                    </div>
+                    <div class="player-stats">
+                        <div class="stat-row">
+                            <span class="stat-label">城市</span>
+                            <span id="pb-cities" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">兵力</span>
+                            <span id="pb-troops" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">可用行动</span>
+                            <span id="pb-actions" class="stat-value">3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 行动面板 -->
+                <div class="action-panel" id="action-panel">
+                    <h3 class="panel-title">选择行动</h3>
+                    <div id="action-form" class="action-form hidden">
+                        <div class="form-group">
+                            <label>起始城市</label>
+                            <div id="selected-city-name" class="form-value">-</div>
+                        </div>
+                        <div class="form-group">
+                            <label>目标城市</label>
+                            <select id="target-select" class="form-select" onchange="onTargetChange()">
+                                <option value="">请选择目标</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>投入兵力</label>
+                            <input type="range" id="army-slider" class="form-range" min="1" max="100" value="15" oninput="onSliderChange()">
+                            <div class="slider-info">
+                                <span id="army-value" class="army-value">15</span>
+                                <span id="attack-hint" class="attack-hint"></span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-block" onclick="submitAction()">执行行动</button>
+                    </div>
+                    <div id="action-hint" class="action-hint">
+                        点击你的城市开始行动
+                    </div>
+                </div>
+
+                <!-- 图例 -->
+                <div class="legend">
+                    <h3 class="legend-title">图例</h3>
+                    <div class="legend-item"><span class="legend-dot" style="background:#4A90D9"></span>蓝方（你）</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#D94A4A"></span>红方（对手）</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#F5A623"></span>NPC 武装</div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- 底部日志 -->
+        <footer class="bottom-bar">
+            <div class="log-title">战斗日志</div>
+            <div id="battle-log" class="battle-log"></div>
+        </footer>
+    </div>
+
+    <!-- 游戏结束弹窗 -->
+    <div id="game-over-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="game-over-title" class="modal-title">游戏结束</h2>
+            <p id="game-over-message" class="modal-message"></p>
+            <button class="btn btn-primary btn-lg" onclick="restartGame()">再来一局</button>
+        </div>
+    </div>
+
+    <script src="/static/js/map2d.js"></script>
+    <script src="/static/js/game.js"></script>
+</body>
+</html>
